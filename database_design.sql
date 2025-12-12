@@ -93,12 +93,12 @@ CREATE TABLE `system_config` (
 -- 插入初始数据
 -- 管理员用户
 INSERT INTO `user` (`username`, `password`, `real_name`, `user_type`) VALUES 
-('admin', MD5('123456'), '系统管理员', '管理员');
+('admin', MD5('admin'), '系统管理员', '管理员');
 
 -- 测试学生用户
 INSERT INTO `user` (`username`, `password`, `real_name`, `user_type`) VALUES 
-('student001', MD5('123456'), '张三', '学生'),
-('student002', MD5('123456'), '李四', '学生');
+('student001', MD5('student001'), '张三', '学生'),
+('student002', MD5('student002'), '李四', '学生');
 
 -- 测试图书馆
 INSERT INTO `library` (`name`, `address`, `description`) VALUES 
