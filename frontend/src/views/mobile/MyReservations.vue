@@ -19,8 +19,8 @@
         <van-tab title="爽约" name="爽约"></van-tab>
       </van-tabs>
       
-      <!-- 调试信息（开发环境显示） -->
-      <div v-if="showDebugInfo" class="debug-info">
+      <!-- 调试信息（仅在需要时显示） -->
+      <!-- <div v-if="showDebugInfo" class="debug-info">
         <p>当前页: {{ pagination.current }}</p>
         <p>每页大小: {{ pagination.size }}</p>
         <p>已加载: {{ reservations.length }}</p>
@@ -31,7 +31,7 @@
           <button @click="forceLoadMore" style="margin-right: 10px; padding: 5px 10px; background: #1989fa; color: white; border: none; border-radius: 4px;">强制加载更多</button>
           <button @click="resetAndReload" style="padding: 5px 10px; background: #ff4d4f; color: white; border: none; border-radius: 4px;">重置并重新加载</button>
         </div>
-      </div>
+      </div> -->
       
       <!-- 预约列表 -->
       <van-list
@@ -118,49 +118,33 @@ export default {
       pagination: {
         current: 1,
         size: 10
-      },
-      showDebugInfo: process.env.NODE_ENV === 'development'
+      }
     }
   },
   
-  watch: {
-    finished(newVal, oldVal) {
-      console.log('finished 状态变化:', { from: oldVal, to: newVal })
-      if (newVal) {
-        console.trace('finished 被设置为 true 的调用栈:')
-      }
-    },
-    
-    loading(newVal, oldVal) {
-      console.log('loading 状态变化:', { from: oldVal, to: newVal })
-    }
-  },
+  // watch: {
+  //   finished(newVal, oldVal) {
+  //     console.log('finished 状态变化:', { from: oldVal, to: newVal })
+  //   },
+  //   
+  //   loading(newVal, oldVal) {
+  //     console.log('loading 状态变化:', { from: oldVal, to: newVal })
+  //   }
+  // },
   
   created() {
-    console.log('MyReservations 组件创建')
+    // 组件创建时的初始化
   },
   
   mounted() {
-    console.log('MyReservations 组件挂载完成', {
-      loading: this.loading,
-      finished: this.finished,
-      reservationsCount: this.reservations.length
-    })
-    // 让 van-list 自动触发初始加载，不需要手动调用
+    // 让 van-list 自动触发初始加载
   },
   
   methods: {
     async loadReservations() {
-      console.log('loadReservations 被调用', {
-        loading: this.loading,
-        finished: this.finished,
-        currentPage: this.pagination.current
-      })
-      
       // 只检查 finished 状态，不检查 loading 状态
       // 因为 van-list 会自动管理 loading 状态
       if (this.finished) {
-        console.log('loadReservations 提前返回，原因：finished = true')
         return
       }
       
@@ -172,11 +156,7 @@ export default {
           status: this.activeTab
         }
         
-        console.log('加载预约记录，参数：', params)
-        
         const res = await getReservationPage(params)
-        
-        console.log('预约记录响应：', res.data)
         
         // 处理返回的数据
         const newRecords = res.data.records || []
@@ -201,23 +181,12 @@ export default {
         const reachedTotal = loadedCount >= totalCount
         
         this.finished = noMoreData || (totalCount > 0 && reachedTotal)
-        
-        console.log('分页状态：', {
-          returnedCount,
-          requestedSize,
-          totalCount,
-          loadedCount,
-          noMoreData,
-          reachedTotal,
-          finished: this.finished,
-          currentPage: this.pagination.current
-        })
+
         
         // 准备下一页
         this.pagination.current++
         
       } catch (error) {
-        console.error('加载预约记录失败：', error)
         this.$toast.fail('加载预约记录失败')
         this.finished = true // 出错时停止加载
       } finally {
@@ -227,12 +196,6 @@ export default {
     
     onLoad() {
       // van-list 的 onLoad 事件，用于加载更多数据
-      console.log('van-list onLoad 触发', {
-        loading: this.loading,
-        finished: this.finished,
-        currentPage: this.pagination.current,
-        reservationsCount: this.reservations.length
-      })
       this.loadReservations()
     },
     
@@ -242,26 +205,10 @@ export default {
     },
     
     resetList() {
-      console.log('重置列表状态', {
-        before: {
-          reservationsCount: this.reservations.length,
-          currentPage: this.pagination.current,
-          finished: this.finished,
-          loading: this.loading
-        }
-      })
       this.reservations = []
       this.pagination.current = 1
       this.finished = false
       this.loading = false
-      console.log('重置列表状态完成', {
-        after: {
-          reservationsCount: this.reservations.length,
-          currentPage: this.pagination.current,
-          finished: this.finished,
-          loading: this.loading
-        }
-      })
     },
     
     async cancelReservation(item) {
@@ -312,20 +259,16 @@ export default {
     },
     
     refreshData() {
-      console.log('手动刷新数据')
       this.resetList()
       this.loadReservations()
     },
     
     forceLoadMore() {
-      console.log('强制加载更多')
       this.finished = false
-      // 不要手动设置 loading = false，让 van-list 管理
       this.loadReservations()
     },
     
     resetAndReload() {
-      console.log('重置并重新加载')
       this.resetList()
       this.$nextTick(() => {
         this.loadReservations()
@@ -422,19 +365,5 @@ export default {
 
 .item-actions .van-button {
   flex: 1;
-}
-
-.debug-info {
-  background: #fff3cd;
-  border: 1px solid #ffeaa7;
-  border-radius: 4px;
-  padding: 10px;
-  margin: 10px;
-  font-size: 12px;
-  color: #856404;
-}
-
-.debug-info p {
-  margin: 2px 0;
 }
 </style>
