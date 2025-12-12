@@ -150,6 +150,11 @@ public class ReservationServiceImpl extends ServiceImpl<ReservationMapper, Reser
     }
     
     @Override
+    public ReservationVO getReservationDetailByOrderNo(String orderNo) {
+        return baseMapper.selectReservationDetailByOrderNo(orderNo);
+    }
+    
+    @Override
     @Transactional
     public void handleExpiredReservations() {
         List<Reservation> expiredReservations = baseMapper.selectExpiredReservations();

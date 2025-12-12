@@ -42,6 +42,11 @@ public interface ReservationService extends IService<Reservation> {
     Reservation getByOrderNo(String orderNo);
     
     /**
+     * 根据流水号查询预约记录详情
+     */
+    ReservationVO getReservationDetailByOrderNo(String orderNo);
+    
+    /**
      * 处理过期预约（定时任务调用）
      */
     void handleExpiredReservations();

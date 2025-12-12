@@ -47,7 +47,7 @@
 </template>
 
 <script>
-import { getReservationByOrderNo } from '@/api/reservation'
+import { getReservationDetailByOrderNo } from '@/api/reservation'
 import QRCode from 'qrcode'
 import { formatTime as formatTimeUtil } from '@/utils/time'
 
@@ -70,11 +70,10 @@ export default {
   methods: {
     async loadReservation(orderNo) {
       try {
-        const res = await getReservationByOrderNo(orderNo)
+        const res = await getReservationDetailByOrderNo(orderNo)
         this.reservation = res.data
         
-        // 这里需要根据实际返回的数据结构调整
-        // 假设返回的数据包含图书馆和座位信息
+        // 现在返回的数据包含完整的图书馆和座位信息
         this.libraryName = this.reservation.libraryName || '未知图书馆'
         this.seatNumber = this.reservation.seatNumber || '未知座位'
       } catch (error) {

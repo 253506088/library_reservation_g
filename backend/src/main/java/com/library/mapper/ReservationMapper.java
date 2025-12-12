@@ -44,4 +44,9 @@ public interface ReservationMapper extends BaseMapper<Reservation> {
      * 查询过期未签到的预约记录
      */
     List<Reservation> selectExpiredReservations();
+    
+    /**
+     * 根据流水号查询预约记录详情
+     */
+    ReservationVO selectReservationDetailByOrderNo(@Param("orderNo") String orderNo);
 }

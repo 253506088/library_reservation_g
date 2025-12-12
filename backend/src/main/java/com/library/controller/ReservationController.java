@@ -123,4 +123,16 @@ public class ReservationController {
         }
         return Result.success(reservation);
     }
+    
+    /**
+     * 根据流水号查询预约记录详情
+     */
+    @GetMapping("/detail/{orderNo}")
+    public Result<ReservationVO> getDetailByOrderNo(@PathVariable String orderNo) {
+        ReservationVO reservation = reservationService.getReservationDetailByOrderNo(orderNo);
+        if (reservation == null) {
+            return Result.error("预约记录不存在");
+        }
+        return Result.success(reservation);
+    }
 }

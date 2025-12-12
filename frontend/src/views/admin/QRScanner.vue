@@ -77,7 +77,7 @@
 </template>
 
 <script>
-import { checkIn, getReservationByOrderNo } from '@/api/reservation'
+import { checkIn, getReservationDetailByOrderNo } from '@/api/reservation'
 import { formatTimeRange as formatTimeRangeUtil } from '@/utils/time'
 
 export default {
@@ -104,7 +104,7 @@ export default {
       this.loading = true
       try {
         // 先获取预约信息
-        const reservationRes = await getReservationByOrderNo(this.orderNo)
+        const reservationRes = await getReservationDetailByOrderNo(this.orderNo)
         this.reservationInfo = reservationRes.data
         
         // 执行签到

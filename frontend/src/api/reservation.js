@@ -46,3 +46,11 @@ export function getReservationByOrderNo(orderNo) {
     method: 'get'
   })
 }
+
+// 根据流水号查询预约记录详情
+export function getReservationDetailByOrderNo(orderNo) {
+  return request({
+    url: `/reservation/detail/${orderNo}`,
+    method: 'get'
+  })
+}

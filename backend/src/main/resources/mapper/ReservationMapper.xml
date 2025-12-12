@@ -75,4 +75,29 @@
         AND end_time &lt; NOW()
     </select>
 
+    <!-- 根据流水号查询预约记录详情 -->
+    <select id="selectReservationDetailByOrderNo" resultType="com.library.vo.ReservationVO">
+        SELECT 
+            r.id,
+            r.order_no as orderNo,
+            r.user_id as userId,
+            u.username as userName,
+            u.real_name as realName,
+            r.library_id as libraryId,
+            l.name as libraryName,
+            r.seat_id as seatId,
+            s.seat_number as seatNumber,
+            r.start_time as startTime,
+            r.end_time as endTime,
+            r.status,
+            r.qr_code as qrCode,
+            r.check_in_time as checkInTime,
+            r.create_time as createTime
+        FROM reservation r
+        LEFT JOIN user u ON r.user_id = u.id
+        LEFT JOIN library l ON r.library_id = l.id
+        LEFT JOIN seat s ON r.seat_id = s.id
+        WHERE r.order_no = #{orderNo}
+    </select>
+
 </mapper>
