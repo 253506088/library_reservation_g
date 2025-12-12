@@ -77,7 +77,13 @@
           <p>{{ getTimeRange() }}</p>
         </div>
         
-        <div class="seat-grid">
+        <!-- 加载中状态 -->
+        <div v-if="loadingSeats" class="loading-container">
+          <van-loading size="24px" vertical>正在查询可用座位...</van-loading>
+        </div>
+        
+        <!-- 有可用座位时显示座位网格 -->
+        <div v-else-if="availableSeats.length > 0" class="seat-grid">
           <div
             v-for="seat in availableSeats"
             :key="seat.id"
@@ -89,11 +95,25 @@
           </div>
         </div>
         
-        <div class="button-container">
+        <!-- 无可用座位时显示满员提示 -->
+        <div v-else class="no-seats-container">
+          <div class="empty-icon">😔</div>
+          <h3>该时间段该图书馆已满员</h3>
+          <p>请尝试选择其他时间段或其他图书馆</p>
+          <van-button round type="primary" class="bottom-button" @click="prevStep">
+            重新选择时间
+          </van-button>
+        </div>
+        
+        <div v-if="availableSeats.length > 0" class="button-container">
           <van-button plain @click="prevStep">上一步</van-button>
           <van-button type="info" :disabled="!selectedSeat" @click="confirmReservation">
             确认预约
           </van-button>
+        </div>
+        
+        <div v-else class="button-container">
+          <van-button plain @click="prevStep">上一步</van-button>
         </div>
       </div>
     </div>
@@ -172,6 +192,7 @@ export default {
       selectedLibrary: null,
       availableSeats: [],
       selectedSeat: null,
+      loadingSeats: false,
       
       // 用户菜单
       showUserMenu: false,
@@ -228,6 +249,7 @@ export default {
     },
     
     async loadAvailableSeats() {
+      this.loadingSeats = true
       try {
         const startDateTime = combineDateTime(this.reservationDate, this.startTime)
         const endDateTime = combineDateTime(this.reservationDate, this.endTime)
@@ -237,9 +259,20 @@ export default {
           startTime: startDateTime,
           endTime: endDateTime
         })
+        
         this.availableSeats = res.data
+        
+        // 如果没有可用座位，显示提示
+        if (this.availableSeats.length === 0) {
+          this.$toast('该时间段该图书馆已满员')
+        }
+        
       } catch (error) {
         this.$toast.fail('加载可用座位失败')
+        // 如果加载失败，返回上一步
+        this.prevStep()
+      } finally {
+        this.loadingSeats = false
       }
     },
     
@@ -257,6 +290,7 @@ export default {
     
     async selectLibrary(library) {
       this.selectedLibrary = library
+      this.selectedSeat = null // 清除之前选择的座位
       await this.loadAvailableSeats()
       this.nextStep()
     },
@@ -397,5 +431,44 @@ export default {
   background: #1989fa;
   color: white;
   border-color: #1989fa;
+}
+
+.no-seats-container {
+  background: white;
+  border-radius: 8px;
+  padding: 40px 20px;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.empty-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+}
+
+.no-seats-container h3 {
+  margin: 0 0 8px 0;
+  color: #323233;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.no-seats-container p {
+  margin: 0 0 24px 0;
+  color: #969799;
+  font-size: 14px;
+  line-height: 20px;
+}
+
+.bottom-button {
+  margin-top: 20px;
+}
+
+.loading-container {
+  background: white;
+  border-radius: 8px;
+  padding: 60px 20px;
+  text-align: center;
+  margin-bottom: 20px;
 }
 </style>
