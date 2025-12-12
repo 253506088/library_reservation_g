@@ -167,6 +167,19 @@ public class ReservationServiceImpl extends ServiceImpl<ReservationMapper, Reser
         log.info("处理过期预约记录：" + expiredReservations.size() + " 条");
     }
     
+    @Override
+    @Transactional
+    public void handleSoonExpiredReservations() {
+        List<Reservation> soonExpiredReservations = baseMapper.selectSoonExpiredReservations();
+        
+        for (Reservation reservation : soonExpiredReservations) {
+            reservation.setStatus("爽约");
+            updateById(reservation);
+        }
+        
+        log.info("处理即将过期预约记录：" + soonExpiredReservations.size() + " 条");
+    }
+    
     /**
      * 生成预约流水号
      */

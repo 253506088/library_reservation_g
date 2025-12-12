@@ -50,4 +50,9 @@ public interface ReservationService extends IService<Reservation> {
      * 处理过期预约（定时任务调用）
      */
     void handleExpiredReservations();
+    
+    /**
+     * 处理即将过期的预约（定时任务调用）
+     */
+    void handleSoonExpiredReservations();
 }

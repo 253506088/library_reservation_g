@@ -75,6 +75,15 @@
         AND end_time &lt; NOW()
     </select>
 
+    <!-- 查询即将过期的预约记录（当前时间已超过预约结束时间前20分钟） -->
+    <select id="selectSoonExpiredReservations" resultType="com.library.entity.Reservation">
+        SELECT *
+        FROM reservation
+        WHERE status = '已预约'
+        AND DATE_SUB(end_time, INTERVAL 20 MINUTE) &lt;= NOW()
+        AND end_time > NOW()
+    </select>
+
     <!-- 根据流水号查询预约记录详情 -->
     <select id="selectReservationDetailByOrderNo" resultType="com.library.vo.ReservationVO">
         SELECT 

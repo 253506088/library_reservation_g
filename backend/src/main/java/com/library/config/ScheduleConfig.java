@@ -1,38 +1,20 @@
 package com.library.config;
 
-import com.library.service.ReservationService;
-import com.library.service.SystemConfigService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Component;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.scheduling.annotation.SchedulingConfigurer;
+import org.springframework.scheduling.config.ScheduledTaskRegistrar;
+
+import java.util.concurrent.Executors;
 
 /**
- * 定时任务配置
+ * 定时任务配置类
  */
-@Component
-@EnableScheduling
-public class ScheduleConfig {
+@Configuration
+public class ScheduleConfig implements SchedulingConfigurer {
     
-    @Autowired
-    private ReservationService reservationService;
-    
-    @Autowired
-    private SystemConfigService systemConfigService;
-    
-    /**
-     * 每5分钟检查一次过期预约
-     */
-    @Scheduled(cron = "0 */5 * * * ?")
-    public void handleExpiredReservations() {
-        reservationService.handleExpiredReservations();
-    }
-    
-    /**
-     * 每天凌晨重置流水号
-     */
-    @Scheduled(cron = "0 0 0 * * ?")
-    public void resetDailySequence() {
-        systemConfigService.resetDailySequence();
+    @Override
+    public void configureTasks(ScheduledTaskRegistrar taskRegistrar) {
+        // 设置定时任务使用的线程池，避免任务阻塞
+        taskRegistrar.setScheduler(Executors.newScheduledThreadPool(2));
     }
 }

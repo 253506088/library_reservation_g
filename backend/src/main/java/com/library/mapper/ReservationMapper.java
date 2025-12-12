@@ -46,6 +46,11 @@ public interface ReservationMapper extends BaseMapper<Reservation> {
     List<Reservation> selectExpiredReservations();
     
     /**
+     * 查询即将过期的预约记录（距离结束时间不足20分钟）
+     */
+    List<Reservation> selectSoonExpiredReservations();
+    
+    /**
      * 根据流水号查询预约记录详情
      */
     ReservationVO selectReservationDetailByOrderNo(@Param("orderNo") String orderNo);
