@@ -60,7 +60,16 @@
         </template>
       </el-table-column>
       <el-table-column prop="seatNumber" label="座位编号" />
-      <el-table-column prop="seatType" label="座位类型" />
+      <el-table-column prop="seatType" label="座位类型" width="120">
+        <template slot-scope="scope">
+          <el-tag 
+            :type="getSeatTypeTagType(scope.row.seatType)"
+            :icon="getSeatTypeIcon(scope.row.seatType)"
+          >
+            {{ scope.row.seatType }}
+          </el-tag>
+        </template>
+      </el-table-column>
       <el-table-column prop="status" label="状态" width="100">
         <template slot-scope="scope">
           <el-tag :type="scope.row.status === '正常' ? 'success' : 'danger'">
@@ -573,6 +582,32 @@ export default {
       
       if (errorCount > 0) {
         throw new Error(`成功创建 ${successCount} 个，失败 ${errorCount} 个`)
+      }
+    },
+
+    // 获取座位类型标签类型
+    getSeatTypeTagType(seatType) {
+      switch (seatType) {
+        case '电脑座位':
+          return 'success'
+        case '静音座位':
+          return 'warning'
+        case '普通座位':
+        default:
+          return 'primary'
+      }
+    },
+
+    // 获取座位类型图标
+    getSeatTypeIcon(seatType) {
+      switch (seatType) {
+        case '电脑座位':
+          return 'el-icon-monitor'
+        case '静音座位':
+          return 'el-icon-bell'
+        case '普通座位':
+        default:
+          return 'el-icon-reading'
       }
     }
   }
