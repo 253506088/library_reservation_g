@@ -15,7 +15,7 @@ public class LibraryApplication {
     
     public static void main(String[] args) {
         SpringApplication.run(LibraryApplication.class, args);
-        System.out.println("图书馆座位预约系统编号2024108923启动成功！");
+        System.out.println("图书馆座位预约系统编号2024108923-启动成功！");
         System.out.println("访问地址：http://localhost:8080/api");
     }
 }
