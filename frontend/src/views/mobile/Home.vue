@@ -104,6 +104,7 @@
       <van-datetime-picker
         v-model="currentDate"
         type="date"
+        title="选择预约日期"
         :min-date="minDate"
         @confirm="onDateConfirm"
         @cancel="showDatePicker = false"
@@ -111,22 +112,22 @@
     </van-popup>
     
     <!-- 开始时间选择器 -->
-    <van-popup v-model="showStartTimePicker" position="bottom">
-      <van-picker
-        :columns="timeColumns"
-        @confirm="onStartTimeConfirm"
-        @cancel="showStartTimePicker = false"
-      />
-    </van-popup>
+    <van-action-sheet
+      v-model="showStartTimePicker"
+      title="选择开始时间"
+      :actions="timeActions"
+      @select="onStartTimeSelect"
+      cancel-text="取消"
+    />
     
     <!-- 结束时间选择器 -->
-    <van-popup v-model="showEndTimePicker" position="bottom">
-      <van-picker
-        :columns="timeColumns"
-        @confirm="onEndTimeConfirm"
-        @cancel="showEndTimePicker = false"
-      />
-    </van-popup>
+    <van-action-sheet
+      v-model="showEndTimePicker"
+      title="选择结束时间"
+      :actions="timeActions"
+      @select="onEndTimeSelect"
+      cancel-text="取消"
+    />
     
     <!-- 用户菜单 -->
     <van-action-sheet v-model="showUserMenu" :actions="userActions" @select="onUserAction" />
@@ -159,6 +160,7 @@ export default {
       
       // 时间选项（只到小时）
       timeColumns: generateTimeOptions(),
+      timeActions: [],
       
       // 图书馆和座位
       libraries: [],
@@ -184,10 +186,19 @@ export default {
     await this.loadLibraries()
     // 初始化当前日期
     this.reservationDate = formatDate(new Date())
+    // 初始化时间选项
+    this.timeActions = this.generateTimeActions()
+    console.log('时间选项:', this.timeColumns)
   },
   
   methods: {
-
+    // 生成时间选择动作
+    generateTimeActions() {
+      return generateTimeOptions().map(time => ({
+        name: time,
+        value: time
+      }))
+    },
     
     async loadLibraries() {
       try {
@@ -263,13 +274,15 @@ export default {
       this.showDatePicker = false
     },
     
-    onStartTimeConfirm(value) {
-      this.startTime = value
+    onStartTimeSelect(action) {
+      console.log('开始时间选择:', action)
+      this.startTime = action.value
       this.showStartTimePicker = false
     },
     
-    onEndTimeConfirm(value) {
-      this.endTime = value
+    onEndTimeSelect(action) {
+      console.log('结束时间选择:', action)
+      this.endTime = action.value
       this.showEndTimePicker = false
     },
     
