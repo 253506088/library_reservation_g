@@ -195,6 +195,7 @@ yarn serve
 3. 预约时间不能是过去时间
 4. 允许迟到签到，但不能超过预约结束时间
 5. 超过预约结束时间未签到将自动标记为"爽约"
+6. 预约时间精确到小时（8:00-22:00），无需选择分钟
 
 ## API接口
 
@@ -297,3 +298,7 @@ mvn clean compile -X
 4. **数据库连接失败**：检查 MySQL 服务和端口配置
 
 更多详细的故障排除信息请参考：`TROUBLESHOOTING.md`
+
+首页（导航页面）：http://localhost:3000
+移动端登录：http://localhost:3000/#/mobile/login
+管理端登录：http://localhost:3000/#/admin/login

@@ -86,7 +86,7 @@
 
 <script>
 import { getReservationPage, cancelReservation } from '@/api/reservation'
-import moment from 'moment'
+import { formatTime as formatTimeUtil, formatTimeRange as formatTimeRangeUtil } from '@/utils/time'
 
 export default {
   name: 'MyReservations',
@@ -178,13 +178,11 @@ export default {
     },
     
     formatTime(timeStr) {
-      return moment(timeStr).format('MM-DD HH:mm')
+      return formatTimeUtil(timeStr)
     },
     
     formatTimeRange(startTime, endTime) {
-      const start = moment(startTime).format('MM-DD HH:mm')
-      const end = moment(endTime).format('HH:mm')
-      return `${start} - ${end}`
+      return formatTimeRangeUtil(startTime, endTime)
     },
     
     getStatusClass(status) {

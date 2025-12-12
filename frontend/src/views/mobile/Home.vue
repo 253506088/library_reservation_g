@@ -112,9 +112,8 @@
     
     <!-- 开始时间选择器 -->
     <van-popup v-model="showStartTimePicker" position="bottom">
-      <van-datetime-picker
-        v-model="currentStartTime"
-        type="time"
+      <van-picker
+        :columns="timeColumns"
         @confirm="onStartTimeConfirm"
         @cancel="showStartTimePicker = false"
       />
@@ -122,9 +121,8 @@
     
     <!-- 结束时间选择器 -->
     <van-popup v-model="showEndTimePicker" position="bottom">
-      <van-datetime-picker
-        v-model="currentEndTime"
-        type="time"
+      <van-picker
+        :columns="timeColumns"
         @confirm="onEndTimeConfirm"
         @cancel="showEndTimePicker = false"
       />
@@ -140,7 +138,7 @@ import { getLibraryList } from '@/api/library'
 import { getAvailableSeats } from '@/api/seat'
 import { createReservation } from '@/api/reservation'
 import { logout } from '@/api/auth'
-import moment from 'moment'
+import { formatDate, combineDateTime, generateTimeOptions, isValidTime } from '@/utils/time'
 
 export default {
   name: 'MobileHome',
@@ -157,9 +155,10 @@ export default {
       showStartTimePicker: false,
       showEndTimePicker: false,
       currentDate: new Date(),
-      currentStartTime: new Date(),
-      currentEndTime: new Date(),
       minDate: new Date(),
+      
+      // 时间选项（只到小时）
+      timeColumns: generateTimeOptions(),
       
       // 图书馆和座位
       libraries: [],
@@ -177,15 +176,19 @@ export default {
   
   computed: {
     isTimeValid() {
-      return this.reservationDate && this.startTime && this.endTime
+      return isValidTime(this.reservationDate, this.startTime, this.endTime)
     }
   },
   
   async created() {
     await this.loadLibraries()
+    // 初始化当前日期
+    this.reservationDate = formatDate(new Date())
   },
   
   methods: {
+
+    
     async loadLibraries() {
       try {
         const res = await getLibraryList()
@@ -197,8 +200,8 @@ export default {
     
     async loadAvailableSeats() {
       try {
-        const startDateTime = `${this.reservationDate} ${this.startTime}:00`
-        const endDateTime = `${this.reservationDate} ${this.endTime}:00`
+        const startDateTime = combineDateTime(this.reservationDate, this.startTime)
+        const endDateTime = combineDateTime(this.reservationDate, this.endTime)
         
         const res = await getAvailableSeats({
           libraryId: this.selectedLibrary.id,
@@ -235,8 +238,8 @@ export default {
     
     async confirmReservation() {
       try {
-        const startDateTime = `${this.reservationDate} ${this.startTime}:00`
-        const endDateTime = `${this.reservationDate} ${this.endTime}:00`
+        const startDateTime = combineDateTime(this.reservationDate, this.startTime)
+        const endDateTime = combineDateTime(this.reservationDate, this.endTime)
         
         const reservationData = {
           libraryId: this.selectedLibrary.id,
@@ -256,17 +259,17 @@ export default {
     },
     
     onDateConfirm(date) {
-      this.reservationDate = moment(date).format('YYYY-MM-DD')
+      this.reservationDate = formatDate(date)
       this.showDatePicker = false
     },
     
-    onStartTimeConfirm(time) {
-      this.startTime = moment(time).format('HH:mm')
+    onStartTimeConfirm(value) {
+      this.startTime = value
       this.showStartTimePicker = false
     },
     
-    onEndTimeConfirm(time) {
-      this.endTime = moment(time).format('HH:mm')
+    onEndTimeConfirm(value) {
+      this.endTime = value
       this.showEndTimePicker = false
     },
     

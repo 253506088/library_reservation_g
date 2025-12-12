@@ -78,7 +78,7 @@
 
 <script>
 import { checkIn, getReservationByOrderNo } from '@/api/reservation'
-import moment from 'moment'
+import { formatTimeRange as formatTimeRangeUtil } from '@/utils/time'
 
 export default {
   name: 'QRScanner',
@@ -138,9 +138,7 @@ export default {
     
     formatTimeRange(startTime, endTime) {
       if (!startTime || !endTime) return ''
-      const start = moment(startTime).format('MM-DD HH:mm')
-      const end = moment(endTime).format('HH:mm')
-      return `${start} - ${end}`
+      return formatTimeRangeUtil(startTime, endTime)
     }
   }
 }

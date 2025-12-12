@@ -49,7 +49,7 @@
 <script>
 import { getReservationByOrderNo } from '@/api/reservation'
 import QRCode from 'qrcode'
-import moment from 'moment'
+import { formatTime as formatTimeUtil } from '@/utils/time'
 
 export default {
   name: 'MobileQRCode',
@@ -99,7 +99,7 @@ export default {
     },
     
     formatTime(timeStr) {
-      return moment(timeStr).format('MM-DD HH:mm')
+      return formatTimeUtil(timeStr)
     },
     
     getStatusClass(status) {
