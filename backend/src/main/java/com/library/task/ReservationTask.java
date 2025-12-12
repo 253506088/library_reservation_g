@@ -23,7 +23,7 @@ public class ReservationTask {
      * 查询当前时间已超过"预约结束时间前20分钟"的记录，将状态设置为"爽约"
      * 例如：预约结束时间是15:00，那么在14:40之后就会被标记为爽约
      */
-    @Scheduled(cron = "0 0/10 * * * ? ") // 30分钟 = 30 * 60 * 1000毫秒
+    @Scheduled(cron = "0 0/10 * * * ? ")
     public void handleSoonExpiredReservations() {
         log.info("开始执行定时任务：处理即将过期的预约");
         try {

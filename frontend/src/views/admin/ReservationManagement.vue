@@ -11,7 +11,13 @@
           <el-input v-model="searchForm.userName" placeholder="请输入用户姓名" clearable style="width: 150px;" />
         </el-form-item>
         <el-form-item label="图书馆">
-          <el-select v-model="searchForm.libraryId" placeholder="请选择图书馆" clearable style="width: 150px;">
+          <el-select 
+            v-model="searchForm.libraryId" 
+            placeholder="请选择图书馆" 
+            clearable 
+            filterable
+            style="width: 150px;"
+          >
             <el-option
               v-for="library in libraries"
               :key="library.id"

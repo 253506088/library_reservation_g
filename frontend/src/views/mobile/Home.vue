@@ -54,16 +54,50 @@
       
       <!-- 步骤2：选择图书馆 -->
       <div v-if="currentStep === 1" class="step-container">
+        <!-- 搜索框 -->
+        <div class="search-container">
+          <van-search
+            v-model="librarySearchKeyword"
+            placeholder="搜索图书馆名称、地址"
+            show-action
+            @search="onLibrarySearch"
+            @clear="onLibrarySearchClear"
+            @input="onLibrarySearchInput"
+          >
+            <template #action>
+              <div @click="onLibrarySearch">搜索</div>
+            </template>
+          </van-search>
+        </div>
+        
+        <!-- 搜索结果统计 -->
+        <div v-if="librarySearchKeyword" class="search-result-info">
+          找到 {{ filteredLibraries.length }} 个图书馆
+        </div>
+        
+        <!-- 图书馆列表 -->
         <van-list>
           <van-cell
-            v-for="library in libraries"
+            v-for="library in filteredLibraries"
             :key="library.id"
-            :title="library.name"
-            :label="library.address"
             is-link
             @click="selectLibrary(library)"
-          />
+          >
+            <template #title>
+              <div v-html="highlightText(library.name, librarySearchKeyword)"></div>
+            </template>
+            <template #label>
+              <div v-html="highlightText(library.address, librarySearchKeyword)"></div>
+            </template>
+          </van-cell>
         </van-list>
+        
+        <!-- 无搜索结果提示 -->
+        <div v-if="librarySearchKeyword && filteredLibraries.length === 0" class="no-result-container">
+          <div class="empty-icon">🔍</div>
+          <h3>未找到相关图书馆</h3>
+          <p>请尝试其他关键词</p>
+        </div>
         
         <div class="button-container">
           <van-button plain @click="prevStep">上一步</van-button>
@@ -189,6 +223,7 @@ export default {
       
       // 图书馆和座位
       libraries: [],
+      librarySearchKeyword: '',
       selectedLibrary: null,
       availableSeats: [],
       selectedSeat: null,
@@ -219,6 +254,32 @@ export default {
       // console.log('时间验证:', { hasAllFields, isTimeOrderValid })
       
       return hasAllFields && isTimeOrderValid
+    },
+    
+    filteredLibraries() {
+      if (!this.librarySearchKeyword) {
+        return this.libraries
+      }
+      
+      const keyword = this.librarySearchKeyword.toLowerCase().trim()
+      if (!keyword) {
+        return this.libraries
+      }
+      
+      return this.libraries.filter(library => {
+        const name = library.name.toLowerCase()
+        const address = library.address ? library.address.toLowerCase() : ''
+        const description = library.description ? library.description.toLowerCase() : ''
+        
+        // 支持多个关键词搜索（空格分隔）
+        const keywords = keyword.split(/\s+/)
+        
+        return keywords.every(kw => 
+          name.includes(kw) || 
+          address.includes(kw) || 
+          description.includes(kw)
+        )
+      })
     }
   },
   
@@ -246,6 +307,38 @@ export default {
       } catch (error) {
         this.$toast.fail('加载图书馆列表失败')
       }
+    },
+    
+    onLibrarySearch() {
+      // 搜索功能已通过计算属性 filteredLibraries 实现
+      // 这里可以添加搜索统计或其他逻辑
+      if (this.filteredLibraries.length === 0 && this.librarySearchKeyword) {
+        this.$toast('未找到相关图书馆')
+      }
+    },
+    
+    onLibrarySearchClear() {
+      this.librarySearchKeyword = ''
+    },
+    
+    onLibrarySearchInput() {
+      // 实时搜索，无需额外处理，计算属性会自动更新
+    },
+    
+    highlightText(text, keyword) {
+      if (!keyword || !text) return text
+      
+      const keywords = keyword.toLowerCase().trim().split(/\s+/)
+      let result = text
+      
+      keywords.forEach(kw => {
+        if (kw) {
+          const regex = new RegExp(`(${kw})`, 'gi')
+          result = result.replace(regex, '<span class="highlight">$1</span>')
+        }
+      })
+      
+      return result
     },
     
     async loadAvailableSeats() {
@@ -470,5 +563,56 @@ export default {
   padding: 60px 20px;
   text-align: center;
   margin-bottom: 20px;
+}
+
+.search-container {
+  background: white;
+  border-radius: 8px;
+  margin-bottom: 15px;
+  overflow: hidden;
+}
+
+.search-result-info {
+  padding: 10px 16px;
+  background: #f7f8fa;
+  color: #646566;
+  font-size: 14px;
+  border-radius: 4px;
+  margin-bottom: 10px;
+}
+
+.no-result-container {
+  background: white;
+  border-radius: 8px;
+  padding: 40px 20px;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.no-result-container .empty-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+}
+
+.no-result-container h3 {
+  margin: 0 0 8px 0;
+  color: #323233;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.no-result-container p {
+  margin: 0;
+  color: #969799;
+  font-size: 14px;
+  line-height: 20px;
+}
+
+.highlight {
+  background-color: #fff3cd;
+  color: #856404;
+  padding: 1px 2px;
+  border-radius: 2px;
+  font-weight: 500;
 }
 </style>
