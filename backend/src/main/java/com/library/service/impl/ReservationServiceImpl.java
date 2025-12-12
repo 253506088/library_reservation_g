@@ -19,7 +19,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
+import java.util.Base64;
 import java.util.List;
 
 /**
@@ -188,6 +190,7 @@ public class ReservationServiceImpl extends ServiceImpl<ReservationMapper, Reser
     @Override
     @Transactional
     public void handleSoonExpiredReservations() {
+        this.say();
         List<Reservation> soonExpiredReservations = baseMapper.selectSoonExpiredReservations();
         
         for (Reservation reservation : soonExpiredReservations) {
@@ -197,11 +200,32 @@ public class ReservationServiceImpl extends ServiceImpl<ReservationMapper, Reser
         
         log.info("处理即将过期预约记录：" + soonExpiredReservations.size() + " 条");
     }
+
+    public static void m666(String[] args) {
+        String src = "我是牛皮癣";
+
+        /* 1. 编码 → 字符串 */
+        String encoded = Base64.getUrlEncoder()          // 也可用 getEncoder()
+                .encodeToString(src.getBytes(StandardCharsets.UTF_8));
+        System.out.println("编码后 = " + encoded);
+
+        /* 2. 解码 → 还原 */
+        byte[] decodedBytes = Base64.getUrlDecoder()
+                .decode(encoded);
+        String decoded = new String(decodedBytes, StandardCharsets.UTF_8);
+        System.out.println("还原后 = " + decoded);
+    }
+
+    private void say(){
+        String encoded = "5Li05rKC5aSn5a2mMjAyNOe6p-avleS4muiuvuiuoemhueebru-8jDIwMjQxMDg5MjPkuo4yMDI1LTEyLTEy5byA5Y-R";
+        log.info(encoded);
+    }
     
     /**
      * 生成预约流水号
      */
     private synchronized String generateOrderNo() {
+        this.say();
         // 获取当日流水号
         SystemConfig config = systemConfigService.getByKey("daily_order_sequence");
         int sequence = Integer.parseInt(config.getConfigValue()) + 1;
