@@ -41,7 +41,12 @@
         </van-cell-group>
         
         <div class="button-container">
-          <van-button type="info" block :disabled="!isTimeValid" @click="nextStep">
+          <van-button 
+            type="info" 
+            block 
+            :disabled="!isTimeValid" 
+            @click="nextStep"
+          >
             下一步
           </van-button>
         </div>
@@ -139,7 +144,7 @@ import { getLibraryList } from '@/api/library'
 import { getAvailableSeats } from '@/api/seat'
 import { createReservation } from '@/api/reservation'
 import { logout } from '@/api/auth'
-import { formatDate, combineDateTime, generateTimeOptions, isValidTime } from '@/utils/time'
+import { formatDate, combineDateTime, generateTimeOptions } from '@/utils/time'
 
 export default {
   name: 'MobileHome',
@@ -178,7 +183,21 @@ export default {
   
   computed: {
     isTimeValid() {
-      return isValidTime(this.reservationDate, this.startTime, this.endTime)
+      // 简单验证：只要三个字段都有值且结束时间晚于开始时间
+      const hasAllFields = this.reservationDate && this.startTime && this.endTime
+      
+      if (!hasAllFields) {
+        return false
+      }
+      
+      // 简单比较时间字符串（因为都是HH:00格式）
+      const startHour = parseInt(this.startTime.split(':')[0])
+      const endHour = parseInt(this.endTime.split(':')[0])
+      const isTimeOrderValid = endHour > startHour
+      
+      // console.log('时间验证:', { hasAllFields, isTimeOrderValid })
+      
+      return hasAllFields && isTimeOrderValid
     }
   },
   
@@ -188,7 +207,6 @@ export default {
     this.reservationDate = formatDate(new Date())
     // 初始化时间选项
     this.timeActions = this.generateTimeActions()
-    console.log('时间选项:', this.timeColumns)
   },
   
   methods: {
@@ -275,13 +293,11 @@ export default {
     },
     
     onStartTimeSelect(action) {
-      console.log('开始时间选择:', action)
       this.startTime = action.value
       this.showStartTimePicker = false
     },
     
     onEndTimeSelect(action) {
-      console.log('结束时间选择:', action)
       this.endTime = action.value
       this.showEndTimePicker = false
     },

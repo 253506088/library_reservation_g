@@ -53,8 +53,11 @@ export function isValidTime(date, startTime, endTime) {
   const end = moment(`${date} ${endTime}`)
   const now = moment()
   
-  // 检查开始时间不能是过去时间
-  if (start.isBefore(now)) {
+  // 检查是否是今天
+  const isToday = moment(date).isSame(now, 'day')
+  
+  // 如果是今天，检查开始时间不能是过去时间
+  if (isToday && start.isBefore(now)) {
     return false
   }
   
