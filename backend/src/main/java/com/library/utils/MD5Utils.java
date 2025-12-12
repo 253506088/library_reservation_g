@@ -20,4 +20,10 @@ public class MD5Utils {
     public static boolean verify(String password, String encryptedPassword) {
         return encrypt(password).equals(encryptedPassword);
     }
+
+    public static void main(String[] args) {
+        String password = "student002";
+        String encryptedPassword = encrypt(password);
+        System.out.println(encryptedPassword);
+    }
 }

@@ -27,12 +27,7 @@ const mobileRoutes = [
     component: () => import('@/views/mobile/Home.vue'),
     meta: { requiresAuth: true, requiresStudent: true }
   },
-  {
-    path: '/mobile/reservation',
-    name: 'MobileReservation',
-    component: () => import('@/views/mobile/Reservation.vue'),
-    meta: { requiresAuth: true, requiresStudent: true }
-  },
+
   {
     path: '/mobile/my-reservations',
     name: 'MobileMyReservations',
@@ -91,6 +86,11 @@ const adminRoutes = [
 const routes = [
   {
     path: '/',
+    name: 'Home',
+    component: () => import('@/views/SimpleTest.vue')
+  },
+  {
+    path: '/auto',
     redirect: () => {
       return isMobile() ? '/mobile' : '/admin'
     }
@@ -100,7 +100,7 @@ const routes = [
 ]
 
 const router = new VueRouter({
-  mode: 'history',
+  mode: 'hash',
   base: process.env.BASE_URL,
   routes
 })

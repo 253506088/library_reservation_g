@@ -168,8 +168,9 @@ yarn serve
 
 ### 访问地址
 
-- **移动端（学生）：** http://localhost:3000/mobile
-- **PC端（管理员）：** http://localhost:3000/admin
+- **移动端（学生）：** http://localhost:3000/#/mobile
+- **PC端（管理员）：** http://localhost:3000/#/admin
+- **首页（自动跳转）：** http://localhost:3000
 
 ### 预约流程
 
@@ -249,3 +250,50 @@ yarn serve
 ## 联系方式
 
 如有问题，请联系开发团队。
+
+## 🔧 故障排除
+
+### 前端编译错误修复
+
+如果遇到前端编译错误，请按以下步骤操作：
+
+#### 方法1：使用修复脚本（推荐）
+```bash
+双击 fix-frontend.bat
+```
+
+#### 方法2：手动修复
+```bash
+cd frontend
+# 删除依赖目录
+rm -rf node_modules
+# 删除锁定文件
+rm package-lock.json
+# 清理缓存
+npm cache clean --force
+# 重新安装
+npm install
+```
+
+#### 方法3：使用国内镜像
+```bash
+npm install --registry=https://registry.npm.taobao.org
+```
+
+### 后端编译错误修复
+
+```bash
+cd backend
+mvn clean compile
+# 如果还有问题，查看详细错误
+mvn clean compile -X
+```
+
+### 常见问题
+
+1. **路由文件找不到**：已修复，移除了不存在的 Reservation.vue 引用
+2. **依赖安装失败**：使用 fix-frontend.bat 脚本自动修复
+3. **端口被占用**：修改 vue.config.js 中的端口配置
+4. **数据库连接失败**：检查 MySQL 服务和端口配置
+
+更多详细的故障排除信息请参考：`TROUBLESHOOTING.md`
