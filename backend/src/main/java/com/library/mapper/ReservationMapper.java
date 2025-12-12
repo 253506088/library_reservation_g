@@ -29,6 +29,9 @@ public interface ReservationMapper extends BaseMapper<Reservation> {
      */
     List<ReservationVO> selectReservationPageWithCondition(@Param("userId") Long userId,
                                                           @Param("status") String status,
+                                                          @Param("userName") String userName,
+                                                          @Param("libraryId") Long libraryId,
+                                                          @Param("seatNumber") String seatNumber,
                                                           @Param("offset") int offset,
                                                           @Param("size") int size);
     
@@ -36,7 +39,10 @@ public interface ReservationMapper extends BaseMapper<Reservation> {
      * 查询预约记录总数
      */
     long countReservationWithCondition(@Param("userId") Long userId,
-                                      @Param("status") String status);
+                                      @Param("status") String status,
+                                      @Param("userName") String userName,
+                                      @Param("libraryId") Long libraryId,
+                                      @Param("seatNumber") String seatNumber);
     
     /**
      * 检查座位时间冲突

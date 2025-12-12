@@ -25,5 +25,5 @@ public interface SeatService extends IService<Seat> {
     /**
      * 分页查询座位
      */
-    PageResult<Seat> pageQuery(int current, int size, Long libraryId, String seatNumber);
+    PageResult<Seat> pageQuery(int current, int size, Long libraryId, String seatNumber, String seatType, String status);
 }

@@ -53,6 +53,8 @@ public class SeatController {
                                         @RequestParam(defaultValue = "10") int size,
                                         @RequestParam(required = false) Long libraryId,
                                         @RequestParam(required = false) String seatNumber,
+                                        @RequestParam(required = false) String seatType,
+                                        @RequestParam(required = false) String status,
                                         HttpSession session) {
         // 检查管理员权限
         User user = (User) session.getAttribute("user");
@@ -61,7 +63,7 @@ public class SeatController {
         }
         
         // 使用手写SQL分页查询
-        PageResult<Seat> result = seatService.pageQuery(current, size, libraryId, seatNumber);
+        PageResult<Seat> result = seatService.pageQuery(current, size, libraryId, seatNumber, seatType, status);
         return Result.success(result);
     }
     

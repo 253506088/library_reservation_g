@@ -18,6 +18,8 @@ public interface SeatMapper extends BaseMapper<Seat> {
      */
     List<Seat> selectPageWithCondition(@Param("libraryId") Long libraryId,
                                       @Param("seatNumber") String seatNumber,
+                                      @Param("seatType") String seatType,
+                                      @Param("status") String status,
                                       @Param("offset") int offset,
                                       @Param("size") int size);
     
@@ -25,5 +27,7 @@ public interface SeatMapper extends BaseMapper<Seat> {
      * 查询总数
      */
     long countWithCondition(@Param("libraryId") Long libraryId,
-                           @Param("seatNumber") String seatNumber);
+                           @Param("seatNumber") String seatNumber,
+                           @Param("seatType") String seatType,
+                           @Param("status") String status);
 }

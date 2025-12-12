@@ -95,6 +95,9 @@ public class ReservationController {
     public Result<PageResult<ReservationVO>> page(@RequestParam(defaultValue = "1") int current,
                                                  @RequestParam(defaultValue = "10") int size,
                                                  @RequestParam(required = false) String status,
+                                                 @RequestParam(required = false) String userName,
+                                                 @RequestParam(required = false) Long libraryId,
+                                                 @RequestParam(required = false) String seatNumber,
                                                  HttpSession session) {
         User user = (User) session.getAttribute("user");
         if (user == null) {
@@ -105,11 +108,14 @@ public class ReservationController {
         if ("学生".equals(user.getUserType())) {
             // 学生只能查看自己的预约记录
             userId = user.getId();
+            // 学生不能搜索其他用户
+            userName = null;
         }
         // 管理员可以查看所有预约记录，userId为null
         
         // 使用手写SQL分页查询
-        PageResult<ReservationVO> result = reservationService.getReservationPageQuery(current, size, userId, status);
+        PageResult<ReservationVO> result = reservationService.getReservationPageQuery(
+            current, size, userId, status, userName, libraryId, seatNumber);
         return Result.success(result);
     }
     

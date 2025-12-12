@@ -40,7 +40,8 @@ public interface ReservationService extends IService<Reservation> {
     /**
      * 分页查询预约记录（手写SQL分页）
      */
-    PageResult<ReservationVO> getReservationPageQuery(int current, int size, Long userId, String status);
+    PageResult<ReservationVO> getReservationPageQuery(int current, int size, Long userId, String status, 
+                                                     String userName, Long libraryId, String seatNumber);
     
     /**
      * 根据流水号查询预约记录

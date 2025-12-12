@@ -7,8 +7,24 @@
     <!-- 搜索区域 -->
     <div class="search-area">
       <el-form :inline="true" :model="searchForm">
+        <el-form-item label="用户姓名">
+          <el-input v-model="searchForm.userName" placeholder="请输入用户姓名" clearable style="width: 150px;" />
+        </el-form-item>
+        <el-form-item label="图书馆">
+          <el-select v-model="searchForm.libraryId" placeholder="请选择图书馆" clearable style="width: 150px;">
+            <el-option
+              v-for="library in libraries"
+              :key="library.id"
+              :label="library.name"
+              :value="library.id"
+            />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="座位号">
+          <el-input v-model="searchForm.seatNumber" placeholder="请输入座位号" clearable style="width: 120px;" />
+        </el-form-item>
         <el-form-item label="预约状态">
-          <el-select v-model="searchForm.status" placeholder="请选择状态" clearable>
+          <el-select v-model="searchForm.status" placeholder="请选择状态" clearable style="width: 120px;">
             <el-option label="已预约" value="已预约" />
             <el-option label="已使用" value="已使用" />
             <el-option label="爽约" value="爽约" />
@@ -73,6 +89,7 @@
 
 <script>
 import { getReservationPage, cancelReservation } from '@/api/reservation'
+import { getLibraryList } from '@/api/library'
 import { formatTimeRange as formatTimeRangeUtil } from '@/utils/time'
 
 export default {
@@ -81,28 +98,45 @@ export default {
     return {
       loading: false,
       tableData: [],
+      libraries: [],
       pagination: {
         current: 1,
         size: 10,
         total: 0
       },
       searchForm: {
+        userName: '',
+        libraryId: null,
+        seatNumber: '',
         status: ''
       }
     }
   },
   
-  created() {
+  async created() {
+    await this.loadLibraries()
     this.loadData()
   },
   
   methods: {
+    async loadLibraries() {
+      try {
+        const res = await getLibraryList()
+        this.libraries = res.data
+      } catch (error) {
+        this.$message.error('加载图书馆列表失败')
+      }
+    },
+    
     async loadData() {
       this.loading = true
       try {
         const params = {
           current: this.pagination.current,
           size: this.pagination.size,
+          userName: this.searchForm.userName,
+          libraryId: this.searchForm.libraryId,
+          seatNumber: this.searchForm.seatNumber,
           status: this.searchForm.status
         }
         const res = await getReservationPage(params)
@@ -121,6 +155,9 @@ export default {
     },
     
     handleReset() {
+      this.searchForm.userName = ''
+      this.searchForm.libraryId = null
+      this.searchForm.seatNumber = ''
       this.searchForm.status = ''
       this.pagination.current = 1
       this.loadData()

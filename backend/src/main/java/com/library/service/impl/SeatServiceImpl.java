@@ -47,15 +47,15 @@ public class SeatServiceImpl extends ServiceImpl<SeatMapper, Seat> implements Se
     }
     
     @Override
-    public PageResult<Seat> pageQuery(int current, int size, Long libraryId, String seatNumber) {
+    public PageResult<Seat> pageQuery(int current, int size, Long libraryId, String seatNumber, String seatType, String status) {
         // 计算偏移量
         int offset = (current - 1) * size;
         
         // 查询数据
-        List<Seat> records = baseMapper.selectPageWithCondition(libraryId, seatNumber, offset, size);
+        List<Seat> records = baseMapper.selectPageWithCondition(libraryId, seatNumber, seatType, status, offset, size);
         
         // 查询总数
-        long total = baseMapper.countWithCondition(libraryId, seatNumber);
+        long total = baseMapper.countWithCondition(libraryId, seatNumber, seatType, status);
         
         // 返回分页结果
         return new PageResult<>(records, total, current, size);

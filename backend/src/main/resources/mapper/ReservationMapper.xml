@@ -138,8 +138,17 @@
             <if test="status != null and status != ''">
                 AND r.status = #{status}
             </if>
+            <if test="userName != null and userName != ''">
+                AND (u.username LIKE CONCAT('%', #{userName}, '%') OR u.real_name LIKE CONCAT('%', #{userName}, '%'))
+            </if>
+            <if test="libraryId != null">
+                AND r.library_id = #{libraryId}
+            </if>
+            <if test="seatNumber != null and seatNumber != ''">
+                AND s.seat_number LIKE CONCAT('%', #{seatNumber}, '%')
+            </if>
         </where>
-        ORDER BY r.id DESC
+        ORDER BY r.create_time DESC
         LIMIT #{offset}, #{size}
     </select>
 
@@ -147,12 +156,24 @@
     <select id="countReservationWithCondition" resultType="long">
         SELECT COUNT(1)
         FROM reservation r
+        LEFT JOIN user u ON r.user_id = u.id
+        LEFT JOIN library l ON r.library_id = l.id
+        LEFT JOIN seat s ON r.seat_id = s.id
         <where>
             <if test="userId != null">
                 AND r.user_id = #{userId}
             </if>
             <if test="status != null and status != ''">
                 AND r.status = #{status}
+            </if>
+            <if test="userName != null and userName != ''">
+                AND (u.username LIKE CONCAT('%', #{userName}, '%') OR u.real_name LIKE CONCAT('%', #{userName}, '%'))
+            </if>
+            <if test="libraryId != null">
+                AND r.library_id = #{libraryId}
+            </if>
+            <if test="seatNumber != null and seatNumber != ''">
+                AND s.seat_number LIKE CONCAT('%', #{seatNumber}, '%')
             </if>
         </where>
     </select>

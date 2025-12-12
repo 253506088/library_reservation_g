@@ -9,7 +9,7 @@
     <div class="search-area">
       <el-form :inline="true" :model="searchForm">
         <el-form-item label="图书馆">
-          <el-select v-model="searchForm.libraryId" placeholder="请选择图书馆" clearable>
+          <el-select v-model="searchForm.libraryId" placeholder="请选择图书馆" clearable style="width: 150px;">
             <el-option
               v-for="library in libraries"
               :key="library.id"
@@ -19,7 +19,21 @@
           </el-select>
         </el-form-item>
         <el-form-item label="座位编号">
-          <el-input v-model="searchForm.seatNumber" placeholder="请输入座位编号" clearable />
+          <el-input v-model="searchForm.seatNumber" placeholder="请输入座位编号" clearable style="width: 120px;" />
+        </el-form-item>
+        <el-form-item label="座位类型">
+          <el-select v-model="searchForm.seatType" placeholder="请选择类型" clearable style="width: 120px;">
+            <el-option label="普通座位" value="普通座位" />
+            <el-option label="电脑座位" value="电脑座位" />
+            <el-option label="静音座位" value="静音座位" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="状态">
+          <el-select v-model="searchForm.status" placeholder="请选择状态" clearable style="width: 100px;">
+            <el-option label="正常" value="正常" />
+            <el-option label="维修" value="维修" />
+            <el-option label="停用" value="停用" />
+          </el-select>
         </el-form-item>
         <el-form-item>
           <el-button type="primary" @click="handleSearch">搜索</el-button>
@@ -129,7 +143,9 @@ export default {
       },
       searchForm: {
         libraryId: null,
-        seatNumber: ''
+        seatNumber: '',
+        seatType: '',
+        status: ''
       },
       dialogVisible: false,
       dialogTitle: '',
@@ -181,7 +197,9 @@ export default {
           current: this.pagination.current,
           size: this.pagination.size,
           libraryId: this.searchForm.libraryId,
-          seatNumber: this.searchForm.seatNumber
+          seatNumber: this.searchForm.seatNumber,
+          seatType: this.searchForm.seatType,
+          status: this.searchForm.status
         }
         const res = await getSeatPage(params)
         this.tableData = res.data.records
@@ -206,6 +224,8 @@ export default {
     handleReset() {
       this.searchForm.libraryId = null
       this.searchForm.seatNumber = ''
+      this.searchForm.seatType = ''
+      this.searchForm.status = ''
       this.pagination.current = 1
       this.loadData()
     },
