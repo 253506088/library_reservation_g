@@ -35,4 +35,9 @@ public interface UserService extends IService<User> {
      * 切换用户状态
      */
     void toggleUserStatus(Long userId);
+    
+    /**
+     * 修改用户类型
+     */
+    void changeUserType(Long userId, String userType);
 }

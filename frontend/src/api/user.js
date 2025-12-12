@@ -20,3 +20,14 @@ export function toggleUserStatus(userId) {
     method: 'put'
   })
 }
+
+/**
+ * 修改用户类型
+ */
+export function changeUserType(userId, userType) {
+  return request({
+    url: `/user/${userId}/change-type`,
+    method: 'put',
+    data: { userType }
+  })
+}

@@ -54,7 +54,7 @@
         </template>
       </el-table-column>
       <el-table-column prop="createTime" label="注册时间" width="180" />
-      <el-table-column label="操作" width="150">
+      <el-table-column label="操作" width="220">
         <template slot-scope="scope">
           <el-button
             size="mini"
@@ -62,6 +62,13 @@
             @click="handleToggleStatus(scope.row)"
           >
             {{ scope.row.status === '正常' ? '禁用' : '启用' }}
+          </el-button>
+          <el-button
+            size="mini"
+            type="warning"
+            @click="handleChangeUserType(scope.row)"
+          >
+            改类型
           </el-button>
         </template>
       </el-table-column>
@@ -83,7 +90,7 @@
 </template>
 
 <script>
-import { getUserPage, toggleUserStatus } from '@/api/user'
+import { getUserPage, toggleUserStatus, changeUserType } from '@/api/user'
 
 export default {
   name: 'UserManagement',
@@ -170,6 +177,29 @@ export default {
       } catch (error) {
         if (error !== 'cancel') {
           this.$message.error(`${action}失败`)
+        }
+      }
+    },
+    
+    async handleChangeUserType(row) {
+      const newUserType = row.userType === '学生' ? '管理员' : '学生'
+      try {
+        await this.$confirm(
+          `确定要将用户"${row.realName}"的类型修改为【${newUserType}】吗？`, 
+          '修改用户类型', 
+          {
+            confirmButtonText: '确定',
+            cancelButtonText: '取消',
+            type: 'warning'
+          }
+        )
+        
+        await changeUserType(row.id, newUserType)
+        this.$message.success('用户类型修改成功')
+        this.loadData()
+      } catch (error) {
+        if (error !== 'cancel') {
+          this.$message.error('用户类型修改失败')
         }
       }
     }

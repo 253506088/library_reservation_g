@@ -97,4 +97,21 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         user.setStatus(newStatus);
         updateById(user);
     }
+    
+    @Override
+    public void changeUserType(Long userId, String userType) {
+        User user = getById(userId);
+        if (user == null) {
+            throw new RuntimeException("用户不存在");
+        }
+        
+        // 验证用户类型
+        if (!userType.equals("学生") && !userType.equals("管理员")) {
+            throw new RuntimeException("用户类型只能是'学生'或'管理员'");
+        }
+        
+        // 修改用户类型
+        user.setUserType(userType);
+        updateById(user);
+    }
 }

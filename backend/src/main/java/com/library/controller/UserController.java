@@ -59,4 +59,29 @@ public class UserController {
             return Result.error(e.getMessage());
         }
     }
+    
+    /**
+     * 修改用户类型
+     */
+    @PutMapping("/{id}/change-type")
+    public Result<Object> changeUserType(@PathVariable Long id, 
+                                        @RequestBody java.util.Map<String, String> request, 
+                                        HttpSession session) {
+        User user = (User) session.getAttribute("user");
+        if (user == null || !"管理员".equals(user.getUserType())) {
+            return Result.error(403, "只有管理员可以修改用户类型");
+        }
+        
+        String userType = request.get("userType");
+        if (userType == null || (!userType.equals("学生") && !userType.equals("管理员"))) {
+            return Result.error("用户类型只能是'学生'或'管理员'");
+        }
+        
+        try {
+            userService.changeUserType(id, userType);
+            return Result.success("用户类型修改成功");
+        } catch (Exception e) {
+            return Result.error(e.getMessage());
+        }
+    }
 }
