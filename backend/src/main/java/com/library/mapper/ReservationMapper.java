@@ -1,0 +1,47 @@
+package com.library.mapper;
+
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.library.entity.Reservation;
+import com.library.vo.ReservationVO;
+import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+/**
+ * 预约记录Mapper接口
+ */
+@Mapper
+public interface ReservationMapper extends BaseMapper<Reservation> {
+    
+    /**
+     * 查询预约记录详情列表
+     */
+    IPage<ReservationVO> selectReservationPage(Page<ReservationVO> page, 
+                                               @Param("userId") Long userId,
+                                               @Param("status") String status);
+    
+    /**
+     * 检查座位时间冲突
+     */
+    int checkSeatTimeConflict(@Param("seatId") Long seatId,
+                              @Param("startTime") LocalDateTime startTime,
+                              @Param("endTime") LocalDateTime endTime,
+                              @Param("excludeId") Long excludeId);
+    
+    /**
+     * 检查用户时间冲突
+     */
+    int checkUserTimeConflict(@Param("userId") Long userId,
+                              @Param("startTime") LocalDateTime startTime,
+                              @Param("endTime") LocalDateTime endTime,
+                              @Param("excludeId") Long excludeId);
+    
+    /**
+     * 查询过期未签到的预约记录
+     */
+    List<Reservation> selectExpiredReservations();
+}
