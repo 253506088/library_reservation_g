@@ -4,6 +4,9 @@
       <template #left>
         <van-icon name="arrow-left" @click="$router.go(-1)" />
       </template>
+      <template #right>
+        <van-icon name="replay" @click="refreshData" />
+      </template>
     </van-nav-bar>
     
     <div class="content">
@@ -16,11 +19,26 @@
         <van-tab title="爽约" name="爽约"></van-tab>
       </van-tabs>
       
+      <!-- 调试信息（开发环境显示） -->
+      <div v-if="showDebugInfo" class="debug-info">
+        <p>当前页: {{ pagination.current }}</p>
+        <p>每页大小: {{ pagination.size }}</p>
+        <p>已加载: {{ reservations.length }}</p>
+        <p>加载中: {{ loading }}</p>
+        <p>已完成: {{ finished }}</p>
+        <p>当前标签: {{ activeTab || '全部' }}</p>
+        <div style="margin-top: 10px;">
+          <button @click="forceLoadMore" style="margin-right: 10px; padding: 5px 10px; background: #1989fa; color: white; border: none; border-radius: 4px;">强制加载更多</button>
+          <button @click="resetAndReload" style="padding: 5px 10px; background: #ff4d4f; color: white; border: none; border-radius: 4px;">重置并重新加载</button>
+        </div>
+      </div>
+      
       <!-- 预约列表 -->
       <van-list
         v-model="loading"
         :finished="finished"
         finished-text="没有更多了"
+        :offset="50"
         @load="onLoad"
       >
         <div
@@ -100,19 +118,53 @@ export default {
       pagination: {
         current: 1,
         size: 10
+      },
+      showDebugInfo: process.env.NODE_ENV === 'development'
+    }
+  },
+  
+  watch: {
+    finished(newVal, oldVal) {
+      console.log('finished 状态变化:', { from: oldVal, to: newVal })
+      if (newVal) {
+        console.trace('finished 被设置为 true 的调用栈:')
       }
+    },
+    
+    loading(newVal, oldVal) {
+      console.log('loading 状态变化:', { from: oldVal, to: newVal })
     }
   },
   
   created() {
-    this.loadReservations()
+    console.log('MyReservations 组件创建')
+  },
+  
+  mounted() {
+    console.log('MyReservations 组件挂载完成', {
+      loading: this.loading,
+      finished: this.finished,
+      reservationsCount: this.reservations.length
+    })
+    // 让 van-list 自动触发初始加载，不需要手动调用
   },
   
   methods: {
     async loadReservations() {
-      if (this.loading) return
+      console.log('loadReservations 被调用', {
+        loading: this.loading,
+        finished: this.finished,
+        currentPage: this.pagination.current
+      })
       
-      this.loading = true
+      // 只检查 finished 状态，不检查 loading 状态
+      // 因为 van-list 会自动管理 loading 状态
+      if (this.finished) {
+        console.log('loadReservations 提前返回，原因：finished = true')
+        return
+      }
+      
+      // van-list 已经自动设置了 loading = true，这里不需要再设置
       try {
         const params = {
           current: this.pagination.current,
@@ -120,26 +172,67 @@ export default {
           status: this.activeTab
         }
         
+        console.log('加载预约记录，参数：', params)
+        
         const res = await getReservationPage(params)
         
+        console.log('预约记录响应：', res.data)
+        
+        // 处理返回的数据
+        const newRecords = res.data.records || []
+        
         if (this.pagination.current === 1) {
-          this.reservations = res.data.records
+          // 第一页，直接替换
+          this.reservations = newRecords
         } else {
-          this.reservations.push(...res.data.records)
+          // 后续页，追加数据
+          this.reservations.push(...newRecords)
         }
         
-        // 检查是否还有更多数据
-        this.finished = this.reservations.length >= res.data.total
+        // 判断是否还有更多数据
+        const returnedCount = newRecords.length
+        const requestedSize = this.pagination.size
+        const totalCount = res.data.total || 0
+        const loadedCount = this.reservations.length
         
+        // 只有当返回的数据少于请求的数量时，才认为没有更多数据
+        // 或者已加载的数据达到了总数
+        const noMoreData = returnedCount < requestedSize
+        const reachedTotal = loadedCount >= totalCount
+        
+        this.finished = noMoreData || (totalCount > 0 && reachedTotal)
+        
+        console.log('分页状态：', {
+          returnedCount,
+          requestedSize,
+          totalCount,
+          loadedCount,
+          noMoreData,
+          reachedTotal,
+          finished: this.finished,
+          currentPage: this.pagination.current
+        })
+        
+        // 准备下一页
         this.pagination.current++
+        
       } catch (error) {
+        console.error('加载预约记录失败：', error)
         this.$toast.fail('加载预约记录失败')
+        this.finished = true // 出错时停止加载
       } finally {
         this.loading = false
       }
     },
     
     onLoad() {
+      // van-list 的 onLoad 事件，用于加载更多数据
+      console.log('van-list onLoad 触发', {
+        loading: this.loading,
+        finished: this.finished,
+        currentPage: this.pagination.current,
+        reservationsCount: this.reservations.length
+      })
       this.loadReservations()
     },
     
@@ -149,9 +242,26 @@ export default {
     },
     
     resetList() {
+      console.log('重置列表状态', {
+        before: {
+          reservationsCount: this.reservations.length,
+          currentPage: this.pagination.current,
+          finished: this.finished,
+          loading: this.loading
+        }
+      })
       this.reservations = []
       this.pagination.current = 1
       this.finished = false
+      this.loading = false
+      console.log('重置列表状态完成', {
+        after: {
+          reservationsCount: this.reservations.length,
+          currentPage: this.pagination.current,
+          finished: this.finished,
+          loading: this.loading
+        }
+      })
     },
     
     async cancelReservation(item) {
@@ -199,6 +309,27 @@ export default {
       if (index === 0) {
         this.$router.push('/mobile/home')
       }
+    },
+    
+    refreshData() {
+      console.log('手动刷新数据')
+      this.resetList()
+      this.loadReservations()
+    },
+    
+    forceLoadMore() {
+      console.log('强制加载更多')
+      this.finished = false
+      // 不要手动设置 loading = false，让 van-list 管理
+      this.loadReservations()
+    },
+    
+    resetAndReload() {
+      console.log('重置并重新加载')
+      this.resetList()
+      this.$nextTick(() => {
+        this.loadReservations()
+      })
     }
   }
 }
@@ -291,5 +422,19 @@ export default {
 
 .item-actions .van-button {
   flex: 1;
+}
+
+.debug-info {
+  background: #fff3cd;
+  border: 1px solid #ffeaa7;
+  border-radius: 4px;
+  padding: 10px;
+  margin: 10px;
+  font-size: 12px;
+  color: #856404;
+}
+
+.debug-info p {
+  margin: 2px 0;
 }
 </style>
