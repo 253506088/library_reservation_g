@@ -1,10 +1,10 @@
 package com.library.controller;
 
-import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.library.dto.ReservationDTO;
 import com.library.entity.Reservation;
 import com.library.entity.User;
 import com.library.service.ReservationService;
+import com.library.vo.PageResult;
 import com.library.vo.ReservationVO;
 import com.library.vo.Result;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -92,10 +92,10 @@ public class ReservationController {
      * 分页查询预约记录
      */
     @GetMapping("/page")
-    public Result<IPage<ReservationVO>> page(@RequestParam(defaultValue = "1") int current,
-                                             @RequestParam(defaultValue = "10") int size,
-                                             @RequestParam(required = false) String status,
-                                             HttpSession session) {
+    public Result<PageResult<ReservationVO>> page(@RequestParam(defaultValue = "1") int current,
+                                                 @RequestParam(defaultValue = "10") int size,
+                                                 @RequestParam(required = false) String status,
+                                                 HttpSession session) {
         User user = (User) session.getAttribute("user");
         if (user == null) {
             return Result.error(401, "请先登录");
@@ -108,7 +108,8 @@ public class ReservationController {
         }
         // 管理员可以查看所有预约记录，userId为null
         
-        IPage<ReservationVO> result = reservationService.getReservationPage(current, size, userId, status);
+        // 使用手写SQL分页查询
+        PageResult<ReservationVO> result = reservationService.getReservationPageQuery(current, size, userId, status);
         return Result.success(result);
     }
     

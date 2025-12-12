@@ -1,11 +1,10 @@
 package com.library.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.library.entity.Library;
 import com.library.entity.User;
 import com.library.service.LibraryService;
+import com.library.vo.PageResult;
 import com.library.vo.Result;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -39,24 +38,24 @@ public class LibraryController {
      * 分页查询图书馆（管理员端使用）
      */
     @GetMapping("/page")
-    public Result<IPage<Library>> page(@RequestParam(defaultValue = "1") int current,
-                                       @RequestParam(defaultValue = "10") int size,
-                                       @RequestParam(required = false) String name,
-                                       HttpSession session) {
+    public Result<PageResult<Library>> page(@RequestParam(defaultValue = "1") int current,
+                                           @RequestParam(defaultValue = "10") int size,
+                                           @RequestParam(required = false) String name,
+                                           HttpSession session) {
+        System.out.println("分页接口被调用，参数：current=" + current + ", size=" + size + ", name=" + name);
+        
         // 检查管理员权限
         User user = (User) session.getAttribute("user");
+        System.out.println("当前用户：" + (user != null ? user.getUsername() + "(" + user.getUserType() + ")" : "未登录"));
+        
         if (user == null || !"管理员".equals(user.getUserType())) {
+            System.out.println("权限验证失败，返回403");
             return Result.error(403, "无权限访问");
         }
         
-        Page<Library> page = new Page<>(current, size);
-        LambdaQueryWrapper<Library> wrapper = new LambdaQueryWrapper<>();
-        if (name != null && !name.trim().isEmpty()) {
-            wrapper.like(Library::getName, name);
-        }
-        wrapper.orderByDesc(Library::getCreateTime);
-        
-        IPage<Library> result = libraryService.page(page, wrapper);
+        // 使用手写SQL分页查询
+        PageResult<Library> result = libraryService.pageQuery(current, size, name);
+        System.out.println("分页查询结果：总数=" + result.getTotal() + ", 当前页数据=" + result.getRecords().size());
         return Result.success(result);
     }
     

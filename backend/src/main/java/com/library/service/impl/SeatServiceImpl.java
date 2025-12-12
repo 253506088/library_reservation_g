@@ -6,6 +6,7 @@ import com.library.entity.Seat;
 import com.library.mapper.ReservationMapper;
 import com.library.mapper.SeatMapper;
 import com.library.service.SeatService;
+import com.library.vo.PageResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -43,5 +44,20 @@ public class SeatServiceImpl extends ServiceImpl<SeatMapper, Seat> implements Se
                     return conflictCount == 0;
                 })
                 .collect(Collectors.toList());
+    }
+    
+    @Override
+    public PageResult<Seat> pageQuery(int current, int size, Long libraryId, String seatNumber) {
+        // 计算偏移量
+        int offset = (current - 1) * size;
+        
+        // 查询数据
+        List<Seat> records = baseMapper.selectPageWithCondition(libraryId, seatNumber, offset, size);
+        
+        // 查询总数
+        long total = baseMapper.countWithCondition(libraryId, seatNumber);
+        
+        // 返回分页结果
+        return new PageResult<>(records, total, current, size);
     }
 }

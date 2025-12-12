@@ -11,6 +11,7 @@ import com.library.mapper.ReservationMapper;
 import com.library.service.ReservationService;
 import com.library.service.SystemConfigService;
 import com.library.utils.OrderNoUtils;
+import com.library.vo.PageResult;
 import com.library.vo.ReservationVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -140,6 +141,21 @@ public class ReservationServiceImpl extends ServiceImpl<ReservationMapper, Reser
     public IPage<ReservationVO> getReservationPage(int current, int size, Long userId, String status) {
         Page<ReservationVO> page = new Page<>(current, size);
         return baseMapper.selectReservationPage(page, userId, status);
+    }
+    
+    @Override
+    public PageResult<ReservationVO> getReservationPageQuery(int current, int size, Long userId, String status) {
+        // 计算偏移量
+        int offset = (current - 1) * size;
+        
+        // 查询数据
+        List<ReservationVO> records = baseMapper.selectReservationPageWithCondition(userId, status, offset, size);
+        
+        // 查询总数
+        long total = baseMapper.countReservationWithCondition(userId, status);
+        
+        // 返回分页结果
+        return new PageResult<>(records, total, current, size);
     }
     
     @Override

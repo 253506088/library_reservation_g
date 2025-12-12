@@ -1,11 +1,10 @@
 package com.library.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.library.entity.Seat;
 import com.library.entity.User;
 import com.library.service.SeatService;
+import com.library.vo.PageResult;
 import com.library.vo.Result;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -50,28 +49,19 @@ public class SeatController {
      * 分页查询座位（管理员端使用）
      */
     @GetMapping("/page")
-    public Result<IPage<Seat>> page(@RequestParam(defaultValue = "1") int current,
-                                    @RequestParam(defaultValue = "10") int size,
-                                    @RequestParam(required = false) Long libraryId,
-                                    @RequestParam(required = false) String seatNumber,
-                                    HttpSession session) {
+    public Result<PageResult<Seat>> page(@RequestParam(defaultValue = "1") int current,
+                                        @RequestParam(defaultValue = "10") int size,
+                                        @RequestParam(required = false) Long libraryId,
+                                        @RequestParam(required = false) String seatNumber,
+                                        HttpSession session) {
         // 检查管理员权限
         User user = (User) session.getAttribute("user");
         if (user == null || !"管理员".equals(user.getUserType())) {
             return Result.error(403, "无权限访问");
         }
         
-        Page<Seat> page = new Page<>(current, size);
-        LambdaQueryWrapper<Seat> wrapper = new LambdaQueryWrapper<>();
-        if (libraryId != null) {
-            wrapper.eq(Seat::getLibraryId, libraryId);
-        }
-        if (seatNumber != null && !seatNumber.trim().isEmpty()) {
-            wrapper.like(Seat::getSeatNumber, seatNumber);
-        }
-        wrapper.orderByDesc(Seat::getCreateTime);
-        
-        IPage<Seat> result = seatService.page(page, wrapper);
+        // 使用手写SQL分页查询
+        PageResult<Seat> result = seatService.pageQuery(current, size, libraryId, seatNumber);
         return Result.success(result);
     }
     

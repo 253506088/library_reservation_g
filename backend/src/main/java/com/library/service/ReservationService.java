@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.library.dto.ReservationDTO;
 import com.library.entity.Reservation;
+import com.library.vo.PageResult;
 import com.library.vo.ReservationVO;
 
 /**
@@ -32,9 +33,14 @@ public interface ReservationService extends IService<Reservation> {
     void checkIn(String orderNo);
     
     /**
-     * 分页查询预约记录
+     * 分页查询预约记录（MyBatis Plus分页）
      */
     IPage<ReservationVO> getReservationPage(int current, int size, Long userId, String status);
+    
+    /**
+     * 分页查询预约记录（手写SQL分页）
+     */
+    PageResult<ReservationVO> getReservationPageQuery(int current, int size, Long userId, String status);
     
     /**
      * 根据流水号查询预约记录

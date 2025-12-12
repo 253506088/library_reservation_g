@@ -18,11 +18,25 @@ import java.util.List;
 public interface ReservationMapper extends BaseMapper<Reservation> {
     
     /**
-     * 查询预约记录详情列表
+     * 查询预约记录详情列表（MyBatis Plus分页）
      */
     IPage<ReservationVO> selectReservationPage(Page<ReservationVO> page, 
                                                @Param("userId") Long userId,
                                                @Param("status") String status);
+    
+    /**
+     * 分页查询预约记录详情列表（手写SQL）
+     */
+    List<ReservationVO> selectReservationPageWithCondition(@Param("userId") Long userId,
+                                                          @Param("status") String status,
+                                                          @Param("offset") int offset,
+                                                          @Param("size") int size);
+    
+    /**
+     * 查询预约记录总数
+     */
+    long countReservationWithCondition(@Param("userId") Long userId,
+                                      @Param("status") String status);
     
     /**
      * 检查座位时间冲突
