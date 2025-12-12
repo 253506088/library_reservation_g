@@ -25,6 +25,10 @@
             <i class="el-icon-tickets"></i>
             <span>预约管理</span>
           </el-menu-item>
+          <el-menu-item index="/admin/dashboard/users">
+            <i class="el-icon-user"></i>
+            <span>用户管理</span>
+          </el-menu-item>
           <el-menu-item index="/admin/dashboard/scanner">
             <i class="el-icon-camera"></i>
             <span>扫码验证</span>

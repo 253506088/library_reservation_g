@@ -75,6 +75,11 @@ const adminRoutes = [
         component: () => import('@/views/admin/ReservationManagement.vue')
       },
       {
+        path: 'users',
+        name: 'UserManagement',
+        component: () => import('@/views/admin/UserManagement.vue')
+      },
+      {
         path: 'scanner',
         name: 'QRScanner',
         component: () => import('@/views/admin/QRScanner.vue')

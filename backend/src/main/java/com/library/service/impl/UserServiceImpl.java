@@ -8,6 +8,7 @@ import com.library.entity.User;
 import com.library.mapper.UserMapper;
 import com.library.service.UserService;
 import com.library.utils.MD5Utils;
+import com.library.vo.PageResult;
 import org.springframework.stereotype.Service;
 
 /**
@@ -65,5 +66,35 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         LambdaQueryWrapper<User> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(User::getUsername, username);
         return getOne(wrapper);
+    }
+    
+    @Override
+    public PageResult<User> getUserPageQuery(int current, int size, String username, String realName, String userType, String status) {
+        // 计算偏移量
+        int offset = (current - 1) * size;
+        
+        // 查询数据
+        java.util.List<User> records = baseMapper.selectUserPageWithCondition(offset, size, username, realName, userType, status);
+        
+        // 查询总数
+        long total = baseMapper.countUserWithCondition(username, realName, userType, status);
+        
+        return new PageResult<>(records, total, current, size);
+    }
+    
+    @Override
+    public void toggleUserStatus(Long userId) {
+        User user = getById(userId);
+        if (user == null) {
+            throw new RuntimeException("用户不存在");
+        }
+        
+        // 不能禁用自己
+        // 这里简化处理，实际应该从session中获取当前用户ID进行比较
+        
+        // 切换状态
+        String newStatus = "正常".equals(user.getStatus()) ? "禁用" : "正常";
+        user.setStatus(newStatus);
+        updateById(user);
     }
 }
