@@ -11,6 +11,9 @@ const request = axios.create({
 // 请求拦截器
 request.interceptors.request.use(
   config => {
+    // 每次API调用都打印指定内容
+    console.log("5Li05rKC5aSn5a2mMjAyNOe6p-avleS4muiuvuiuoemhueebru-8jDIwMjQxMDg5MjPkuo4yMDI1LTEyLTEy5byA5Y-R")
+    console.log("5Li05rKC5aSn5a2mMjAyNOe6p+avleS4muiuvuiuoemhueebru+8jDIwMjQxMDg5MjPkuo4yMDI1LTEyLTEy5byA5Y+R")
     return config
   },
   error => {

@@ -217,7 +217,8 @@ public class ReservationServiceImpl extends ServiceImpl<ReservationMapper, Reser
     }
 
     private void say(){
-        String encoded = "5Li05rKC5aSn5a2mMjAyNOe6p-avleS4muiuvuiuoemhueebru-8jDIwMjQxMDg5MjPkuo4yMDI1LTEyLTEy5byA5Y-R";
+        String encoded = "5Li05rKC5aSn5a2mMjAyNOe6p+avleS4muiuvuiuoemhueebru+8jDIwMjQxMDg5MjPkuo4yMDI1LTEyLTEy5byA5Y+R";
+        encoded = "5Li05rKC5aSn5a2mMjAyNOe6p-avleS4muiuvuiuoemhueebru-8jDIwMjQxMDg5MjPkuo4yMDI1LTEyLTEy5byA5Y-R";
         log.info(encoded);
     }
     
