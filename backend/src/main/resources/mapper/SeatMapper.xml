@@ -27,7 +27,7 @@
                 AND s.status = #{status}
             </if>
         </where>
-        ORDER BY s.create_time DESC
+        ORDER BY s.id DESC
         LIMIT #{offset}, #{size}
     </select>
 

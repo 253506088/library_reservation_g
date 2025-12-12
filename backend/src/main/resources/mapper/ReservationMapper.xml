@@ -148,7 +148,7 @@
                 AND s.seat_number LIKE CONCAT('%', #{seatNumber}, '%')
             </if>
         </where>
-        ORDER BY r.create_time DESC
+        ORDER BY r.id DESC
         LIMIT #{offset}, #{size}
     </select>
 

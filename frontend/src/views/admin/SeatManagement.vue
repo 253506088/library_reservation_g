@@ -2,7 +2,10 @@
   <div class="seat-management">
     <div class="page-header">
       <h2>座位管理</h2>
-      <el-button type="primary" @click="showAddDialog">新增座位</el-button>
+      <div class="header-buttons">
+        <el-button type="primary" @click="showAddDialog">新增座位</el-button>
+        <el-button type="success" @click="showBatchAddDialog">批量新增座位</el-button>
+      </div>
     </div>
     
     <!-- 搜索区域 -->
@@ -128,6 +131,109 @@
         <el-button type="primary" @click="handleSubmit" :loading="submitLoading">确定</el-button>
       </div>
     </el-dialog>
+    
+    <!-- 批量新增对话框 -->
+    <el-dialog
+      title="批量新增座位"
+      :visible.sync="batchDialogVisible"
+      width="600px"
+      @close="resetBatchForm"
+    >
+      <el-form ref="batchForm" :model="batchForm" :rules="batchRules" label-width="120px">
+        <el-form-item label="图书馆" prop="libraryId">
+          <el-select v-model="batchForm.libraryId" placeholder="请选择图书馆" filterable style="width: 100%;">
+            <el-option
+              v-for="library in libraries"
+              :key="library.id"
+              :label="library.name"
+              :value="library.id"
+            />
+          </el-select>
+        </el-form-item>
+        
+        <el-form-item label="座位编号区间">
+          <el-row :gutter="10">
+            <el-col :span="11">
+              <el-form-item prop="startNumber">
+                <el-input-number 
+                  v-model="batchForm.startNumber" 
+                  :min="1" 
+                  :max="9999"
+                  placeholder="起始编号"
+                  style="width: 100%;"
+                  @change="updatePreview"
+                />
+              </el-form-item>
+            </el-col>
+            <el-col :span="2" style="text-align: center; line-height: 40px;">
+              至
+            </el-col>
+            <el-col :span="11">
+              <el-form-item prop="endNumber">
+                <el-input-number 
+                  v-model="batchForm.endNumber" 
+                  :min="batchForm.startNumber + 1" 
+                  :max="9999"
+                  placeholder="结束编号"
+                  style="width: 100%;"
+                  @change="updatePreview"
+                />
+              </el-form-item>
+            </el-col>
+          </el-row>
+        </el-form-item>
+        
+        <el-form-item label="座位类型" prop="seatType">
+          <el-select v-model="batchForm.seatType" placeholder="请选择座位类型" style="width: 100%;">
+            <el-option label="普通座位" value="普通座位" />
+            <el-option label="电脑座位" value="电脑座位" />
+            <el-option label="静音座位" value="静音座位" />
+          </el-select>
+        </el-form-item>
+        
+        <el-form-item label="状态" prop="status">
+          <el-select v-model="batchForm.status" placeholder="请选择状态" style="width: 100%;">
+            <el-option label="正常" value="正常" />
+            <el-option label="维修" value="维修" />
+            <el-option label="停用" value="停用" />
+          </el-select>
+        </el-form-item>
+        
+        <!-- 预览区域 -->
+        <el-form-item label="预览" v-if="previewSeats.length > 0">
+          <div class="preview-area">
+            <div class="preview-info">
+              <span>将生成 {{ previewSeats.length }} 个座位：</span>
+            </div>
+            <div class="preview-seats">
+              <el-tag 
+                v-for="seat in previewSeats.slice(0, 10)" 
+                :key="seat"
+                size="small"
+                style="margin: 2px;"
+              >
+                {{ seat }}
+              </el-tag>
+              <span v-if="previewSeats.length > 10" class="more-indicator">
+                ... 还有 {{ previewSeats.length - 10 }} 个
+              </span>
+            </div>
+          </div>
+        </el-form-item>
+      </el-form>
+      
+      <div slot="footer">
+        <el-button @click="batchDialogVisible = false">取消</el-button>
+        <el-button 
+          type="primary" 
+          @click="handleBatchSubmit" 
+          :loading="batchSubmitLoading"
+          :disabled="previewSeats.length === 0"
+        >
+          批量新增 ({{ previewSeats.length }}个)
+        </el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
@@ -164,12 +270,56 @@ export default {
         seatType: '普通座位',
         status: '正常'
       },
+      
+      // 批量新增相关
+      batchDialogVisible: false,
+      batchSubmitLoading: false,
+      batchForm: {
+        libraryId: null,
+        startNumber: 1,
+        endNumber: null,
+        seatType: '普通座位',
+        status: '正常'
+      },
+      previewSeats: [],
       rules: {
         libraryId: [
           { required: true, message: '请选择图书馆', trigger: 'change' }
         ],
         seatNumber: [
           { required: true, message: '请输入座位编号', trigger: 'blur' }
+        ],
+        seatType: [
+          { required: true, message: '请选择座位类型', trigger: 'change' }
+        ],
+        status: [
+          { required: true, message: '请选择状态', trigger: 'change' }
+        ]
+      },
+      
+      // 批量新增验证规则
+      batchRules: {
+        libraryId: [
+          { required: true, message: '请选择图书馆', trigger: 'change' }
+        ],
+        startNumber: [
+          { required: true, message: '请输入起始编号', trigger: 'blur' },
+          { type: 'number', min: 1, message: '起始编号不能小于1', trigger: 'blur' }
+        ],
+        endNumber: [
+          { required: true, message: '请输入结束编号', trigger: 'blur' },
+          { 
+            validator: (rule, value, callback) => {
+              if (!value) {
+                callback(new Error('请输入结束编号'))
+              } else if (value <= this.batchForm.startNumber) {
+                callback(new Error('结束编号必须大于起始编号'))
+              } else {
+                callback()
+              }
+            }, 
+            trigger: 'blur' 
+          }
         ],
         seatType: [
           { required: true, message: '请选择座位类型', trigger: 'change' }
@@ -311,6 +461,119 @@ export default {
       if (this.$refs.form) {
         this.$refs.form.resetFields()
       }
+    },
+    
+    // 批量新增相关方法
+    showBatchAddDialog() {
+      this.batchDialogVisible = true
+      this.updatePreview()
+    },
+    
+    resetBatchForm() {
+      this.batchForm = {
+        libraryId: null,
+        startNumber: 1,
+        endNumber: null,
+        seatType: '普通座位',
+        status: '正常'
+      }
+      this.previewSeats = []
+      if (this.$refs.batchForm) {
+        this.$refs.batchForm.resetFields()
+      }
+    },
+    
+    updatePreview() {
+      this.previewSeats = []
+      
+      if (this.batchForm.startNumber && this.batchForm.endNumber && 
+          this.batchForm.endNumber > this.batchForm.startNumber) {
+        
+        const seats = []
+        for (let i = this.batchForm.startNumber; i <= this.batchForm.endNumber; i++) {
+          // 格式化座位编号为三位数，如 001, 002, 010
+          const seatNumber = String(i).padStart(3, '0')
+          seats.push(seatNumber)
+        }
+        this.previewSeats = seats
+      }
+    },
+    
+    async handleBatchSubmit() {
+      this.$refs.batchForm.validate(async (valid) => {
+        if (valid) {
+          if (this.previewSeats.length === 0) {
+            this.$message.warning('请设置正确的座位编号区间')
+            return
+          }
+          
+          // 确认批量新增
+          try {
+            await this.$confirm(
+              `确定要批量新增 ${this.previewSeats.length} 个座位吗？`, 
+              '批量新增确认', 
+              {
+                confirmButtonText: '确定',
+                cancelButtonText: '取消',
+                type: 'warning'
+              }
+            )
+            
+            this.batchSubmitLoading = true
+            
+            // 构建批量新增的座位数据
+            const seats = this.previewSeats.map(seatNumber => ({
+              libraryId: this.batchForm.libraryId,
+              seatNumber: seatNumber,
+              seatType: this.batchForm.seatType,
+              status: this.batchForm.status
+            }))
+            
+            // 调用批量新增API
+            await this.batchCreateSeats(seats)
+            
+            this.$message.success(`成功新增 ${seats.length} 个座位`)
+            this.batchDialogVisible = false
+            this.loadData()
+            
+          } catch (error) {
+            if (error !== 'cancel') {
+              this.$message.error('批量新增失败：' + (error.message || '未知错误'))
+            }
+          } finally {
+            this.batchSubmitLoading = false
+          }
+        }
+      })
+    },
+    
+    async batchCreateSeats(seats) {
+      // 分批处理，避免一次性创建太多座位导致请求超时
+      const batchSize = 10
+      const batches = []
+      
+      for (let i = 0; i < seats.length; i += batchSize) {
+        batches.push(seats.slice(i, i + batchSize))
+      }
+      
+      let successCount = 0
+      let errorCount = 0
+      
+      for (const batch of batches) {
+        try {
+          // 并发创建当前批次的座位
+          const promises = batch.map(seat => createSeat(seat))
+          await Promise.all(promises)
+          successCount += batch.length
+        } catch (error) {
+          errorCount += batch.length
+          console.error('批次创建失败:', error)
+        }
+      }
+      
+      if (errorCount > 0) {
+        throw new Error(`成功创建 ${successCount} 个，失败 ${errorCount} 个`)
+      }
     }
   }
 }
@@ -345,5 +608,34 @@ export default {
 .pagination {
   margin-top: 20px;
   text-align: right;
+}
+
+.header-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.preview-area {
+  border: 1px solid #e4e7ed;
+  border-radius: 4px;
+  padding: 15px;
+  background-color: #fafafa;
+}
+
+.preview-info {
+  margin-bottom: 10px;
+  font-weight: 500;
+  color: #606266;
+}
+
+.preview-seats {
+  max-height: 120px;
+  overflow-y: auto;
+}
+
+.more-indicator {
+  color: #909399;
+  font-size: 12px;
+  margin-left: 5px;
 }
 </style>
