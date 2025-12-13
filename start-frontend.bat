@@ -1,3 +1,4 @@
+cd frontend
 npm run serve
 
 @REM @echo off
